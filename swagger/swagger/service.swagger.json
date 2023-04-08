@@ -1,0 +1,283 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "mozg_microservice",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "ProtectedAPI"
+    },
+    {
+      "name": "ExposedAPI"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/exposed/v1/hello": {
+      "post": {
+        "operationId": "ExposedAPI_Hello",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/io.mozg.mozg_microservice.exposed.Hello.Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/io.mozg.mozg_microservice.exposed.Hello.Request"
+            }
+          }
+        ],
+        "tags": [
+          "ExposedAPI"
+        ]
+      }
+    },
+    "/exposed/v1/hello-protected": {
+      "post": {
+        "operationId": "ExposedAPI_HelloProtected",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/io.mozg.mozg_microservice.exposed.Hello.Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/io.mozg.mozg_microservice.exposed.Hello.Request"
+            }
+          }
+        ],
+        "tags": [
+          "ExposedAPI"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/protected/v1/hello": {
+      "post": {
+        "operationId": "ProtectedAPI_Hello",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/io.mozg.mozg_microservice.protected.Hello.Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/io.mozg.mozg_microservice.protected.Hello.Request"
+            }
+          }
+        ],
+        "tags": [
+          "ProtectedAPI"
+        ],
+        "security": [
+          {
+            "x-s2s-authorization": []
+          }
+        ]
+      }
+    },
+    "/protected/v1/version": {
+      "get": {
+        "operationId": "ProtectedAPI_Version",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/io.mozg.mozg_microservice.protected.Version.Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "tags": [
+          "ProtectedAPI"
+        ],
+        "security": [
+          {
+            "x-s2s-authorization": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "io.mozg.mozg_microservice.exposed.Hello.Request": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "io.mozg.mozg_microservice.exposed.Hello.Response": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "io.mozg.mozg_microservice.protected.Hello.Request": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "io.mozg.mozg_microservice.protected.Hello.Response": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "io.mozg.mozg_microservice.protected.Version.Response": {
+      "type": "object",
+      "properties": {
+        "commit": {
+          "type": "string"
+        },
+        "settings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "main": {
+          "$ref": "#/definitions/io.mozg.mozg_microservice.protected.Version.Response.Main"
+        },
+        "path": {
+          "type": "string"
+        },
+        "goVersion": {
+          "type": "string"
+        }
+      }
+    },
+    "io.mozg.mozg_microservice.protected.Version.Response.Main": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sum": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "authorization": {
+      "type": "apiKey",
+      "name": "authorization",
+      "in": "header"
+    },
+    "x-s2s-authorization": {
+      "type": "apiKey",
+      "name": "x-s2s-authorization",
+      "in": "header"
+    }
+  }
+}
