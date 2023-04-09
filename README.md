@@ -1,5 +1,7 @@
 # application
 
+[![Go Test](https://github.com/mozgio/application/actions/workflows/go.yml/badge.svg)](https://github.com/mozgio/application/actions/workflows/go.yml)
+
 Application package.
 
 ## example
