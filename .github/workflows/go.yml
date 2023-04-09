@@ -10,8 +10,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    env:
-      GOPRIVATE: github.com/mozgio
     steps:
     - uses: actions/checkout@v3
 
