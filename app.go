@@ -8,6 +8,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	Database "github.com/mozgio/database"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func New[TConfig ConfigType, TDatabase DatabaseType]() App[TConfig, TDatabase] {
@@ -15,6 +16,9 @@ func New[TConfig ConfigType, TDatabase DatabaseType]() App[TConfig, TDatabase] {
 
 	a := &app[TConfig, TDatabase]{
 		ctx: ctx,
+		gatewayGRPCOpts: []grpc.DialOption{
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		},
 	}
 
 	return a
