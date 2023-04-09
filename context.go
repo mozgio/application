@@ -2,9 +2,9 @@ package Application
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
+	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 )
 
@@ -19,16 +19,18 @@ type Context[TConfig ConfigType, TDatabase DatabaseType] interface {
 	context.Context
 
 	Log() *zap.Logger
+	Nats() *nats.Conn
 	Database() TDatabase
 	Config() *TConfig
 }
 
 type appContext[TConfig ConfigType, TDatabase DatabaseType] struct {
-	parent context.Context
-	logger *zap.Logger
-	config *TConfig
-	db     TDatabase
-	dbConn *sql.DB
+	parent    context.Context
+	logger    *zap.Logger
+	nats      *nats.Conn
+	config    *TConfig
+	db        TDatabase
+	closeFunc []func() error
 }
 
 func (ctx *appContext[TConfig, TDatabase]) Deadline() (deadline time.Time, ok bool) {
@@ -55,12 +57,12 @@ func (ctx *appContext[TConfig, TDatabase]) Database() TDatabase {
 	return ctx.db
 }
 
-func (ctx *appContext[TConfig, TDatabase]) DbConn() *sql.DB {
-	return ctx.dbConn
-}
-
 func (ctx *appContext[TConfig, TDatabase]) Config() *TConfig {
 	return ctx.config
+}
+
+func (ctx *appContext[TConfig, TDatabase]) Nats() *nats.Conn {
+	return ctx.nats
 }
 
 func (ctx *appContext[TConfig, TDatabase]) withConfig(cfg *TConfig) *appContext[TConfig, TDatabase] {
@@ -68,12 +70,12 @@ func (ctx *appContext[TConfig, TDatabase]) withConfig(cfg *TConfig) *appContext[
 	return ctx
 }
 
-func (ctx *appContext[TConfig, TDatabase]) withDb(db TDatabase) *appContext[TConfig, TDatabase] {
+func (ctx *appContext[TConfig, TDatabase]) withDatabase(db TDatabase) *appContext[TConfig, TDatabase] {
 	ctx.db = db
 	return ctx
 }
 
-func (ctx *appContext[TConfig, TDatabase]) withDbConn(conn *sql.DB) *appContext[TConfig, TDatabase] {
-	ctx.dbConn = conn
+func (ctx *appContext[TConfig, TDatabase]) withNats(nc *nats.Conn) *appContext[TConfig, TDatabase] {
+	ctx.nats = nc
 	return ctx
 }

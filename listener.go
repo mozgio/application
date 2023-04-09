@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 )
 
@@ -27,13 +28,22 @@ func (a *app[TConfig, Database]) Listen() {
 			a.ctx.Log().Fatal("failed to open database connection",
 				zap.Error(err))
 		}
-		a.ctx = a.ctx.withDb(conn)
+		a.ctx = a.ctx.withDatabase(conn)
 		if a.withMigrations {
 			if err = a.databaseDriver.Migrate(a.migrationsConfig.fs, a.migrationsConfig.pattern); err != nil {
 				a.ctx.Log().Fatal("failed to migrate",
 					zap.Error(err))
 			}
 		}
+	}
+
+	if a.withNats {
+		nc, err := nats.Connect(a.natsConfig.uri, a.natsConfig.opts...)
+		if err != nil {
+			a.ctx.Log().Fatal("failed to connect nats",
+				zap.Error(err))
+		}
+		a.ctx = a.ctx.withNats(nc)
 	}
 
 	a.gatewayMux = runtime.NewServeMux(a.gatewayMuxOpts...)
@@ -69,7 +79,13 @@ func (a *app[TConfig, Database]) Listen() {
 
 		var closers []func() error
 		if a.withDatabase {
-			closers = append(closers, a.ctx.DbConn().Close)
+			closers = append(closers, a.databaseDriver.Close)
+		}
+		if a.withNats {
+			closers = append(closers, func() error {
+				a.ctx.nats.Close()
+				return nil
+			})
 		}
 
 		for _, closer := range closers {

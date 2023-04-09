@@ -8,6 +8,7 @@ import (
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	Database "github.com/mozgio/database"
+	"github.com/nats-io/nats.go"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -47,6 +48,7 @@ type App[TConfig ConfigType, TDatabase DatabaseType] interface {
 	WithService(factory ServiceFunc[TConfig, TDatabase]) App[TConfig, TDatabase]
 	WithSwagger(contents []byte) App[TConfig, TDatabase]
 	WithMetrics(...prometheus.Collector) App[TConfig, TDatabase]
+	WithNats(uri string, opts ...nats.Option) App[TConfig, TDatabase]
 	Listen()
 }
 
@@ -90,4 +92,7 @@ type app[TConfig ConfigType, TDatabase DatabaseType] struct {
 
 	withSwagger   bool
 	swaggerConfig swaggerConfig
+
+	withNats   bool
+	natsConfig natsConfig
 }
