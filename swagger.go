@@ -1,6 +1,6 @@
-package app
+package Application
 
-func (a *app) WithSwagger(contents []byte) App {
+func (a *app[TConfig, TDatabase]) WithSwagger(contents []byte) App[TConfig, TDatabase] {
 	a.withSwagger = true
 	a.swaggerConfig = swaggerConfig{contents}
 	return a

@@ -1,4 +1,4 @@
-package app
+package Application
 
 import (
 	"context"
@@ -6,37 +6,42 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	Database "github.com/mozgio/database"
 	"google.golang.org/grpc"
 )
 
-func New() App {
-	ctx := newContext()
+func New[TConfig ConfigType, TDatabase DatabaseType]() App[TConfig, TDatabase] {
+	ctx := newContext[TConfig, TDatabase]()
 
-	a := &app{
+	a := &app[TConfig, TDatabase]{
 		ctx: ctx,
 	}
 
 	return a
 }
 
-type App interface {
-	WithGRPC(host string, port int) App
-	WithHTTP(host string, port int) App
-	WithGRPCServerOption(opts ...grpc.ServerOption) App
-	WithUnaryInterceptor(interceptor grpc.UnaryServerInterceptor) App
-	WithStreamInterceptor(interceptor grpc.StreamServerInterceptor) App
-	WithDatabase(dsn string) App
-	WithMigrations(migrationsFs fs.FS, pattern string) App
-	WithService(factory ServiceFunc) App
-	WithSwagger(contents []byte) App
+type App[TConfig ConfigType, TDatabase DatabaseType] interface {
+	WithConfig(cfg *TConfig) App[TConfig, TDatabase]
+	WithGRPC(host string, port int) App[TConfig, TDatabase]
+	WithHTTP(host string, port int) App[TConfig, TDatabase]
+	WithGRPCServerOption(opts ...grpc.ServerOption) App[TConfig, TDatabase]
+	WithUnaryInterceptor(interceptor grpc.UnaryServerInterceptor) App[TConfig, TDatabase]
+	WithStreamInterceptor(interceptor grpc.StreamServerInterceptor) App[TConfig, TDatabase]
+	WithDatabase(driver Database.Driver[TDatabase]) App[TConfig, TDatabase]
+	WithMigrations(migrationsFs fs.FS, pattern string) App[TConfig, TDatabase]
+	WithService(factory ServiceFunc[TConfig, TDatabase]) App[TConfig, TDatabase]
+	WithSwagger(contents []byte) App[TConfig, TDatabase]
 	Listen()
 }
 
-type GatewayFunc func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error
-type ServiceFunc func(Context) (*grpc.ServiceDesc, GatewayFunc, any)
+type ConfigType any
+type DatabaseType any
 
-type app struct {
-	ctx Context
+type GatewayFunc func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error
+type ServiceFunc[TConfig ConfigType, TDatabase DatabaseType] func(Context[TConfig, TDatabase]) (*grpc.ServiceDesc, GatewayFunc, any)
+
+type app[TConfig ConfigType, TDatabase DatabaseType] struct {
+	ctx *appContext[TConfig, TDatabase]
 
 	gatewayMux      *runtime.ServeMux
 	gatewayGRPCOpts []grpc.DialOption
@@ -45,7 +50,7 @@ type app struct {
 	grpcServer *grpc.Server
 	httpServer *http.Server
 
-	services []ServiceFunc
+	services []ServiceFunc[TConfig, TDatabase]
 
 	grpcServerOpts     []grpc.ServerOption
 	unaryInterceptors  []grpc.UnaryServerInterceptor
@@ -58,7 +63,7 @@ type app struct {
 	httpListenerConfig listenerConfig
 
 	withDatabase   bool
-	databaseConfig databaseConfig
+	databaseDriver Database.Driver[TDatabase]
 
 	withMigrations   bool
 	migrationsConfig migrationsConfig

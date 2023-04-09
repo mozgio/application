@@ -1,15 +1,15 @@
-package app
+package Application
 
 import (
 	"go.uber.org/zap"
 )
 
-func (a *app) WithService(factory ServiceFunc) App {
+func (a *app[TConfig, TDatabase]) WithService(factory ServiceFunc[TConfig, TDatabase]) App[TConfig, TDatabase] {
 	a.services = append(a.services, factory)
 	return a
 }
 
-func (a *app) configureServices() {
+func (a *app[Config, Database]) configureServices() {
 	for _, factory := range a.services {
 		desc, gw, impl := factory(a.ctx)
 

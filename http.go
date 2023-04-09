@@ -1,4 +1,4 @@
-package app
+package Application
 
 import (
 	"errors"
@@ -8,13 +8,13 @@ import (
 	"go.uber.org/zap"
 )
 
-func (a *app) WithHTTP(host string, port int) App {
+func (a *app[TConfig, Database]) WithHTTP(host string, port int) App[TConfig, Database] {
 	a.withHTTP = true
 	a.httpListenerConfig = listenerConfig{host, port}
 	return a
 }
 
-func (a *app) serveHTTP() {
+func (a *app[TConfig, Database]) serveHTTP() {
 	var handler http.Handler = a.gatewayMux
 
 	if a.withSwagger {

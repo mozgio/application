@@ -1,4 +1,4 @@
-package app
+package Application
 
 import (
 	"net"
@@ -7,28 +7,28 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (a *app) WithGRPC(host string, port int) App {
+func (a *app[TConfig, TDatabase]) WithGRPC(host string, port int) App[TConfig, TDatabase] {
 	a.withGRPC = true
 	a.grpcListenerConfig = listenerConfig{host, port}
 	return a
 }
 
-func (a *app) WithGRPCServerOption(opts ...grpc.ServerOption) App {
+func (a *app[TConfig, TDatabase]) WithGRPCServerOption(opts ...grpc.ServerOption) App[TConfig, TDatabase] {
 	a.grpcServerOpts = append(a.grpcServerOpts, opts...)
 	return a
 }
 
-func (a *app) WithUnaryInterceptor(interceptor grpc.UnaryServerInterceptor) App {
+func (a *app[TConfig, TDatabase]) WithUnaryInterceptor(interceptor grpc.UnaryServerInterceptor) App[TConfig, TDatabase] {
 	a.unaryInterceptors = append(a.unaryInterceptors, interceptor)
 	return a
 }
 
-func (a *app) WithStreamInterceptor(interceptor grpc.StreamServerInterceptor) App {
+func (a *app[TConfig, TDatabase]) WithStreamInterceptor(interceptor grpc.StreamServerInterceptor) App[TConfig, TDatabase] {
 	a.streamInterceptors = append(a.streamInterceptors, interceptor)
 	return a
 }
 
-func (a *app) serveGRPC() {
+func (a *app[TConfig, TDatabase]) serveGRPC() {
 	a.grpcServer = grpc.NewServer(append(a.grpcServerOpts,
 		grpc.ChainUnaryInterceptor(a.unaryInterceptors...),
 		grpc.ChainStreamInterceptor(a.streamInterceptors...),

@@ -1,4 +1,4 @@
-package app
+package Application
 
 import (
 	"context"
@@ -20,11 +20,19 @@ func (lc listenerConfig) address() string {
 	return fmt.Sprintf("%s:%d", lc.host, lc.port)
 }
 
-func (a *app) Listen() {
+func (a *app[TConfig, Database]) Listen() {
 	if a.withDatabase {
-		a.ctx = connectToDatabase(a.ctx, a.databaseConfig)
+		conn, err := a.databaseDriver.Connect()
+		if err != nil {
+			a.ctx.Log().Fatal("failed to open database connection",
+				zap.Error(err))
+		}
+		a.ctx = a.ctx.withDb(conn)
 		if a.withMigrations {
-			migrateDatabase(a.ctx, a.migrationsConfig)
+			if err = a.databaseDriver.Migrate(a.migrationsConfig.fs, a.migrationsConfig.pattern); err != nil {
+				a.ctx.Log().Fatal("failed to migrate",
+					zap.Error(err))
+			}
 		}
 	}
 

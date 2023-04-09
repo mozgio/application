@@ -1,4 +1,4 @@
-package app
+package Application
 
 import (
 	"context"
@@ -6,68 +6,74 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"gopkg.in/reform.v1"
 )
 
-func newContext() Context {
-	return &appContext{
+func newContext[TConfig ConfigType, TDatabase DatabaseType]() *appContext[TConfig, TDatabase] {
+	return &appContext[TConfig, TDatabase]{
 		parent: context.Background(),
 		logger: initLogger(),
 	}
 }
 
-type Context interface {
+type Context[TConfig ConfigType, TDatabase DatabaseType] interface {
 	context.Context
 
 	Log() *zap.Logger
-	Db() *reform.DB
-	DbConn() *sql.DB
-
-	withDb(db *reform.DB) Context
-	withDbConn(conn *sql.DB) Context
+	Database() TDatabase
+	Config() *TConfig
 }
 
-type appContext struct {
+type appContext[TConfig ConfigType, TDatabase DatabaseType] struct {
 	parent context.Context
 	logger *zap.Logger
-	db     *reform.DB
+	config *TConfig
+	db     TDatabase
 	dbConn *sql.DB
 }
 
-func (ctx *appContext) Deadline() (deadline time.Time, ok bool) {
+func (ctx *appContext[TConfig, TDatabase]) Deadline() (deadline time.Time, ok bool) {
 	return ctx.parent.Deadline()
 }
 
-func (ctx *appContext) Done() <-chan struct{} {
+func (ctx *appContext[TConfig, TDatabase]) Done() <-chan struct{} {
 	return ctx.parent.Done()
 }
 
-func (ctx *appContext) Err() error {
+func (ctx *appContext[TConfig, TDatabase]) Err() error {
 	return ctx.parent.Err()
 }
 
-func (ctx *appContext) Value(key any) any {
+func (ctx *appContext[TConfig, TDatabase]) Value(key any) any {
 	return ctx.parent.Value(key)
 }
 
-func (ctx *appContext) Log() *zap.Logger {
+func (ctx *appContext[TConfig, TDatabase]) Log() *zap.Logger {
 	return ctx.logger
 }
 
-func (ctx *appContext) Db() *reform.DB {
+func (ctx *appContext[TConfig, TDatabase]) Database() TDatabase {
 	return ctx.db
 }
 
-func (ctx *appContext) DbConn() *sql.DB {
+func (ctx *appContext[TConfig, TDatabase]) DbConn() *sql.DB {
 	return ctx.dbConn
 }
 
-func (ctx *appContext) withDb(db *reform.DB) Context {
+func (ctx *appContext[TConfig, TDatabase]) Config() *TConfig {
+	return ctx.config
+}
+
+func (ctx *appContext[TConfig, TDatabase]) withConfig(cfg *TConfig) *appContext[TConfig, TDatabase] {
+	ctx.config = cfg
+	return ctx
+}
+
+func (ctx *appContext[TConfig, TDatabase]) withDb(db TDatabase) *appContext[TConfig, TDatabase] {
 	ctx.db = db
 	return ctx
 }
 
-func (ctx *appContext) withDbConn(conn *sql.DB) Context {
+func (ctx *appContext[TConfig, TDatabase]) withDbConn(conn *sql.DB) *appContext[TConfig, TDatabase] {
 	ctx.dbConn = conn
 	return ctx
 }
