@@ -49,6 +49,7 @@ type App[TConfig ConfigType, TDatabase DatabaseType] interface {
 	WithSwagger(contents []byte) App[TConfig, TDatabase]
 	WithMetrics(...prometheus.Collector) App[TConfig, TDatabase]
 	WithNats(uri string, opts ...nats.Option) App[TConfig, TDatabase]
+	WithRunner(runnerFunc RunnerFunc[TConfig, TDatabase]) App[TConfig, TDatabase]
 	Listen()
 }
 
@@ -57,6 +58,7 @@ type DatabaseType any
 
 type GatewayFunc func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error
 type ServiceFunc[TConfig ConfigType, TDatabase DatabaseType] func(Context[TConfig, TDatabase]) (*grpc.ServiceDesc, GatewayFunc, any)
+type RunnerFunc[TConfig ConfigType, TDatabase DatabaseType] func(Context[TConfig, TDatabase])
 
 type app[TConfig ConfigType, TDatabase DatabaseType] struct {
 	ctx *appContext[TConfig, TDatabase]
@@ -95,4 +97,7 @@ type app[TConfig ConfigType, TDatabase DatabaseType] struct {
 
 	withNats   bool
 	natsConfig natsConfig
+
+	withRunners bool
+	runners     []RunnerFunc[TConfig, TDatabase]
 }

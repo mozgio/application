@@ -46,6 +46,12 @@ func (a *app[TConfig, Database]) Listen() {
 		a.ctx = a.ctx.withNats(nc)
 	}
 
+	if a.withRunners {
+		for _, run := range a.runners {
+			go run(a.ctx)
+		}
+	}
+
 	a.gatewayMux = runtime.NewServeMux(a.gatewayMuxOpts...)
 
 	if a.withGRPC {
@@ -81,6 +87,7 @@ func (a *app[TConfig, Database]) Listen() {
 		if a.withDatabase {
 			closers = append(closers, a.databaseDriver.Close)
 		}
+
 		if a.withNats {
 			closers = append(closers, func() error {
 				a.ctx.nats.Close()
