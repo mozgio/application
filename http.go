@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/mozgio/app/swagger"
+	"github.com/mozgio/application/swagger"
 	"go.uber.org/zap"
 )
 

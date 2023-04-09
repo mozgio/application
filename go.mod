@@ -1,4 +1,4 @@
-module github.com/mozgio/app
+module github.com/mozgio/application
 
 go 1.20
 
