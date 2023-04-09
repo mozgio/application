@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"io/fs"
+	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -10,6 +11,7 @@ import (
 
 func New() App {
 	ctx := newContext()
+
 	a := &app{
 		ctx: ctx,
 	}
@@ -18,9 +20,11 @@ func New() App {
 }
 
 type App interface {
-	WithMiddleware(mw grpc.UnaryServerInterceptor) App
 	WithGRPC(host string, port int) App
 	WithHTTP(host string, port int) App
+	WithGRPCServerOption(opts ...grpc.ServerOption) App
+	WithUnaryInterceptor(interceptor grpc.UnaryServerInterceptor) App
+	WithStreamInterceptor(interceptor grpc.StreamServerInterceptor) App
 	WithDatabase(dsn string) App
 	WithMigrations(migrationsFs fs.FS, pattern string) App
 	WithService(factory ServiceFunc) App
@@ -32,30 +36,33 @@ type GatewayFunc func(context.Context, *runtime.ServeMux, string, []grpc.DialOpt
 type ServiceFunc func(Context) (*grpc.ServiceDesc, GatewayFunc, any)
 
 type app struct {
-	ctx                Context
-	services           []ServiceFunc
+	ctx Context
+
+	gatewayMux      *runtime.ServeMux
+	gatewayGRPCOpts []grpc.DialOption
+	gatewayMuxOpts  []runtime.ServeMuxOption
+
+	grpcServer *grpc.Server
+	httpServer *http.Server
+
+	services []ServiceFunc
+
+	grpcServerOpts     []grpc.ServerOption
+	unaryInterceptors  []grpc.UnaryServerInterceptor
+	streamInterceptors []grpc.StreamServerInterceptor
+
+	withGRPC           bool
 	grpcListenerConfig listenerConfig
+
+	withHTTP           bool
 	httpListenerConfig listenerConfig
-	withDatabase       bool
-	databaseConfig     databaseConfig
-	withMigrations     bool
-	migrationsConfig   migrationsConfig
-	middlewares        []grpc.UnaryServerInterceptor
-	withSwagger        bool
-	swaggerConfig      swaggerConfig
-}
 
-func (a *app) WithGRPC(host string, port int) App {
-	a.grpcListenerConfig = listenerConfig{host, port}
-	return a
-}
+	withDatabase   bool
+	databaseConfig databaseConfig
 
-func (a *app) WithHTTP(host string, port int) App {
-	a.httpListenerConfig = listenerConfig{host, port}
-	return a
-}
+	withMigrations   bool
+	migrationsConfig migrationsConfig
 
-func (a *app) WithService(factory ServiceFunc) App {
-	a.services = append(a.services, factory)
-	return a
+	withSwagger   bool
+	swaggerConfig swaggerConfig
 }
