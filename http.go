@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/mozgio/application/Swagger"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
@@ -25,7 +25,10 @@ func (a *app[TConfig, Database]) serveHTTP() {
 	}
 
 	if a.withMetrics {
-		handler = wrapWithMetrics(a.serverMetrics, handler)
+		for _, col := range a.metrics {
+			prometheus.MustRegister(col)
+		}
+		handler = wrapWithMetrics(handler)
 	}
 
 	a.httpServer = &http.Server{
@@ -43,7 +46,7 @@ func (a *app[TConfig, Database]) serveHTTP() {
 	}
 }
 
-func wrapWithMetrics(serverMetrics *prometheus.ServerMetrics, nextHandler http.Handler) http.Handler {
+func wrapWithMetrics(nextHandler http.Handler) http.Handler {
 	promHandler := promhttp.Handler()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/metrics") {

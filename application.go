@@ -7,8 +7,8 @@ import (
 
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/mozgio/application/Metrics"
 	Database "github.com/mozgio/database"
+	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -46,7 +46,7 @@ type App[TConfig ConfigType, TDatabase DatabaseType] interface {
 	WithMigrations(migrationsFs fs.FS, pattern string) App[TConfig, TDatabase]
 	WithService(factory ServiceFunc[TConfig, TDatabase]) App[TConfig, TDatabase]
 	WithSwagger(contents []byte) App[TConfig, TDatabase]
-	WithMetrics(...Metrics.Metric) App[TConfig, TDatabase]
+	WithMetrics(...prometheus.Collector) App[TConfig, TDatabase]
 	Listen()
 }
 
@@ -60,7 +60,7 @@ type app[TConfig ConfigType, TDatabase DatabaseType] struct {
 	ctx *appContext[TConfig, TDatabase]
 
 	withMetrics   bool
-	metrics       []Metrics.Metric
+	metrics       []prometheus.Collector
 	serverMetrics *grpcPrometheus.ServerMetrics
 
 	gatewayMux      *runtime.ServeMux
