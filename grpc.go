@@ -34,6 +34,10 @@ func (a *app[TConfig, TDatabase]) serveGRPC() {
 		grpc.ChainStreamInterceptor(a.streamInterceptors...),
 	)...)
 
+	if a.withMetrics {
+		a.serverMetrics.InitializeMetrics(a.grpcServer)
+	}
+
 	a.configureServices()
 
 	a.ctx.Log().Info("starting grpc service",

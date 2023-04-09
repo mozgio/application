@@ -3,8 +3,11 @@ package Application
 import (
 	"errors"
 	"net/http"
+	"strings"
 
-	"github.com/mozgio/application/swagger"
+	"github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
+	"github.com/mozgio/application/Swagger"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
 
@@ -18,7 +21,11 @@ func (a *app[TConfig, Database]) serveHTTP() {
 	var handler http.Handler = a.gatewayMux
 
 	if a.withSwagger {
-		handler = swagger.WithSwagger(a.swaggerConfig.fileContext, handler)
+		handler = Swagger.WithSwagger(a.swaggerConfig.fileContext, handler)
+	}
+
+	if a.withMetrics {
+		handler = wrapWithMetrics(a.serverMetrics, handler)
 	}
 
 	a.httpServer = &http.Server{
@@ -34,4 +41,15 @@ func (a *app[TConfig, Database]) serveHTTP() {
 			zap.Int("port", a.httpListenerConfig.port),
 			zap.Error(err))
 	}
+}
+
+func wrapWithMetrics(serverMetrics *prometheus.ServerMetrics, nextHandler http.Handler) http.Handler {
+	promHandler := promhttp.Handler()
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/metrics") {
+			promHandler.ServeHTTP(w, r)
+			return
+		}
+		nextHandler.ServeHTTP(w, r)
+	})
 }

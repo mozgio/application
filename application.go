@@ -5,7 +5,9 @@ import (
 	"io/fs"
 	"net/http"
 
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/mozgio/application/Metrics"
 	Database "github.com/mozgio/database"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -14,8 +16,17 @@ import (
 func New[TConfig ConfigType, TDatabase DatabaseType]() App[TConfig, TDatabase] {
 	ctx := newContext[TConfig, TDatabase]()
 
+	serverMetrics := grpcPrometheus.NewServerMetrics()
+
 	a := &app[TConfig, TDatabase]{
-		ctx: ctx,
+		ctx:           ctx,
+		serverMetrics: serverMetrics,
+		unaryInterceptors: []grpc.UnaryServerInterceptor{
+			serverMetrics.UnaryServerInterceptor(),
+		},
+		streamInterceptors: []grpc.StreamServerInterceptor{
+			serverMetrics.StreamServerInterceptor(),
+		},
 		gatewayGRPCOpts: []grpc.DialOption{
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		},
@@ -35,6 +46,7 @@ type App[TConfig ConfigType, TDatabase DatabaseType] interface {
 	WithMigrations(migrationsFs fs.FS, pattern string) App[TConfig, TDatabase]
 	WithService(factory ServiceFunc[TConfig, TDatabase]) App[TConfig, TDatabase]
 	WithSwagger(contents []byte) App[TConfig, TDatabase]
+	WithMetrics(...Metrics.Metric) App[TConfig, TDatabase]
 	Listen()
 }
 
@@ -46,6 +58,10 @@ type ServiceFunc[TConfig ConfigType, TDatabase DatabaseType] func(Context[TConfi
 
 type app[TConfig ConfigType, TDatabase DatabaseType] struct {
 	ctx *appContext[TConfig, TDatabase]
+
+	withMetrics   bool
+	metrics       []Metrics.Metric
+	serverMetrics *grpcPrometheus.ServerMetrics
 
 	gatewayMux      *runtime.ServeMux
 	gatewayGRPCOpts []grpc.DialOption
