@@ -6,7 +6,7 @@ import (
 	"github.com/mozgio/database"
 )
 
-func (a *app[TConfig, TDatabase]) WithDatabase(driver Database.Driver[TDatabase]) App[TConfig, TDatabase] {
+func (a *app[TConfig, TDatabase]) WithDatabase(driver database.Driver[TDatabase]) App[TConfig, TDatabase] {
 	a.databaseDriver = driver
 	return a
 }

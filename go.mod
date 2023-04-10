@@ -6,7 +6,7 @@ require (
 	github.com/caarlos0/env/v7 v7.1.0
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.0.0-rc.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
-	github.com/mozgio/database v0.0.2
+	github.com/mozgio/database v0.0.3
 	github.com/nats-io/nats.go v1.25.0
 	github.com/prometheus/client_golang v1.14.0
 	go.uber.org/zap v1.24.0

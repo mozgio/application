@@ -24,8 +24,8 @@ github.com/klauspost/compress v1.16.0 h1:iULayQNOReoYUe+1qtKOqw9CwJv3aNQu8ivo7lw
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=
 github.com/matttproud/golang_protobuf_extensions v1.0.4/go.mod h1:BSXmuO+STAnVfrANrmjBb36TMTDstsz7MSK+HVaYKv4=
 github.com/minio/highwayhash v1.0.2 h1:Aak5U0nElisjDCfPSG79Tgzkn2gl66NxOMspRrKnA/g=
-github.com/mozgio/database v0.0.2 h1:4ttBL9A6TyLXBOIusPXgnYG2hGnJOXqtBjjvSGmuDpE=
-github.com/mozgio/database v0.0.2/go.mod h1:ALIgOt7nibiH0It0A9O/n1eVKL5uZ4F12hZZ4UYWKp0=
+github.com/mozgio/database v0.0.3 h1:R0yoxRxZKPzO7gKRpQnD2H0iibfxwG7hrOz1iYUvZ5U=
+github.com/mozgio/database v0.0.3/go.mod h1:ALIgOt7nibiH0It0A9O/n1eVKL5uZ4F12hZZ4UYWKp0=
 github.com/nats-io/jwt/v2 v2.3.0 h1:z2mA1a7tIf5ShggOFlR1oBPgd6hGqcDYsISxZByUzdI=
 github.com/nats-io/nats-server/v2 v2.9.15 h1:MuwEJheIwpvFgqvbs20W8Ish2azcygjf4Z0liVu2I4c=
 github.com/nats-io/nats-server/v2 v2.9.15/go.mod h1:QlCTy115fqpx4KSOPFIxSV7DdI6OxtZsGOL1JLdeRlE=
