@@ -1,4 +1,4 @@
-package Application
+package application
 
 import (
 	"github.com/prometheus/client_golang/prometheus"

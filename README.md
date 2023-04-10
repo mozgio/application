@@ -12,21 +12,21 @@ package main
 import (
 	"time"
 
-	Application "github.com/mozgio/application"
+	"github.com/mozgio/application"
 	"go.uber.org/zap"
 )
 
 func main() {
-	cfg := Application.MustParseConfig[Config]()
+	cfg := application.MustParseConfig[Config]()
 
-	run := func(ctx Application.Context[Config, any]) {
+	run := func(ctx application.Context[Config, any]) {
 		timer := time.NewTimer(time.Second * 5)
 		for t := range timer.C {
 			ctx.Log().Info("time", zap.Time("time", t))
 		}
 	}
 
-	Application.
+	application.
 		New[Config, any]().
 		WithConfig(cfg).
 		WithGRPC(cfg.GRPCAddress()).

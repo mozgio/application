@@ -1,4 +1,4 @@
-package Application
+package application
 
 func (a *app[TConfig, TDatabase]) WithSwagger(contents []byte) App[TConfig, TDatabase] {
 	a.withSwagger = true

@@ -1,4 +1,4 @@
-package Application
+package application
 
 import (
 	"github.com/caarlos0/env/v7"

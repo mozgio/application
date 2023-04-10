@@ -1,11 +1,11 @@
-package Application
+package application
 
 import (
 	"errors"
 	"net/http"
 	"strings"
 
-	"github.com/mozgio/application/Swagger"
+	"github.com/mozgio/application/swagger"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
@@ -21,7 +21,7 @@ func (a *app[TConfig, Database]) serveHTTP() {
 	var handler http.Handler = a.gatewayMux
 
 	if a.withSwagger {
-		handler = Swagger.WithSwagger(a.swaggerConfig.fileContext, handler)
+		handler = swagger.WithSwagger(a.swaggerConfig.fileContext, handler)
 	}
 
 	if a.withMetrics {

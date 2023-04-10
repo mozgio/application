@@ -1,4 +1,4 @@
-package Swagger
+package swagger
 
 import (
 	"embed"
