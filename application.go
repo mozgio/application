@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func New[TConfig ConfigType, TDatabase DatabaseType]() App[TConfig, TDatabase] {
+func New[TConfig any, TDatabase any]() App[TConfig, TDatabase] {
 	ctx := newContext[TConfig, TDatabase]()
 
 	serverMetrics := grpcPrometheus.NewServerMetrics()
@@ -36,7 +36,7 @@ func New[TConfig ConfigType, TDatabase DatabaseType]() App[TConfig, TDatabase] {
 	return a
 }
 
-type App[TConfig ConfigType, TDatabase DatabaseType] interface {
+type App[TConfig any, TDatabase any] interface {
 	WithConfig(cfg *TConfig) App[TConfig, TDatabase]
 	WithGRPC(host string, port int) App[TConfig, TDatabase]
 	WithHTTP(host string, port int) App[TConfig, TDatabase]
@@ -53,14 +53,14 @@ type App[TConfig ConfigType, TDatabase DatabaseType] interface {
 	Listen()
 }
 
-type ConfigType any
-type DatabaseType any
+//type any any
+//type any any
 
 type GatewayFunc func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error
-type ServiceFunc[TConfig ConfigType, TDatabase DatabaseType] func(Context[TConfig, TDatabase]) (*grpc.ServiceDesc, GatewayFunc, any)
-type RunnerFunc[TConfig ConfigType, TDatabase DatabaseType] func(Context[TConfig, TDatabase])
+type ServiceFunc[TConfig any, TDatabase any] func(Context[TConfig, TDatabase]) (*grpc.ServiceDesc, GatewayFunc, any)
+type RunnerFunc[TConfig any, TDatabase any] func(Context[TConfig, TDatabase])
 
-type app[TConfig ConfigType, TDatabase DatabaseType] struct {
+type app[TConfig any, TDatabase any] struct {
 	ctx *appContext[TConfig, TDatabase]
 
 	withMetrics   bool

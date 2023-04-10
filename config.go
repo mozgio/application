@@ -4,7 +4,7 @@ import (
 	"github.com/caarlos0/env/v7"
 )
 
-func MustParseConfig[TConfig ConfigType]() *TConfig {
+func MustParseConfig[TConfig any]() *TConfig {
 	cfg, err := ParseConfig[TConfig]()
 	if err != nil {
 		panic(err)
@@ -12,7 +12,7 @@ func MustParseConfig[TConfig ConfigType]() *TConfig {
 	return cfg
 }
 
-func ParseConfig[TConfig ConfigType]() (*TConfig, error) {
+func ParseConfig[TConfig any]() (*TConfig, error) {
 	cfg := new(TConfig)
 	if err := env.Parse(cfg); err != nil {
 		return nil, err

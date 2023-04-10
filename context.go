@@ -8,14 +8,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func newContext[TConfig ConfigType, TDatabase DatabaseType]() *appContext[TConfig, TDatabase] {
+func newContext[TConfig any, TDatabase any]() *appContext[TConfig, TDatabase] {
 	return &appContext[TConfig, TDatabase]{
 		parent: context.Background(),
 		logger: initLogger(),
 	}
 }
 
-type Context[TConfig ConfigType, TDatabase DatabaseType] interface {
+type Context[TConfig any, TDatabase any] interface {
 	context.Context
 
 	Log() *zap.Logger
@@ -24,7 +24,7 @@ type Context[TConfig ConfigType, TDatabase DatabaseType] interface {
 	Config() *TConfig
 }
 
-type appContext[TConfig ConfigType, TDatabase DatabaseType] struct {
+type appContext[TConfig any, TDatabase any] struct {
 	parent    context.Context
 	logger    *zap.Logger
 	nats      *nats.Conn
