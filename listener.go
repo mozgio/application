@@ -30,6 +30,7 @@ func (a *app[TConfig, Database]) Listen() {
 		}
 		a.ctx = a.ctx.withDatabase(conn)
 		if a.withMigrations {
+			a.ctx.Log().Info("running migrations")
 			if err = a.databaseDriver.Migrate(a.migrationsConfig.fs, a.migrationsConfig.pattern); err != nil {
 				a.ctx.Log().Fatal("failed to migrate",
 					zap.Error(err))
