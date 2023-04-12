@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"os"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"go.uber.org/zap"
@@ -10,16 +11,23 @@ import (
 )
 
 func initLogger() *zap.Logger {
-	logger, err := zap.NewProduction()
+	level, err := zap.ParseAtomicLevel(os.Getenv("LOG_LEVEL"))
+	if err != nil {
+		level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
+	}
+
+	cfg := zap.NewProductionConfig()
+	cfg.Level = level
+
+	logger, err := cfg.Build(
+		zap.AddStacktrace(zapcore.FatalLevel),
+		zap.WithCaller(false),
+	)
 	if err != nil {
 		panic(errors.Join(err, errInitLoggerFailed))
 	}
 
-	return logger.
-		WithOptions(
-			zap.AddStacktrace(zapcore.FatalLevel),
-			zap.WithCaller(false),
-		)
+	return logger
 }
 
 var errInitLoggerFailed = errors.New("failed to init logger")
