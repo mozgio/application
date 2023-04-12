@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	Database "github.com/mozgio/database"
 	"github.com/nats-io/nats.go"
@@ -18,14 +19,18 @@ func New[TConfig any, TDatabase any]() App[TConfig, TDatabase] {
 	ctx := newContext[TConfig, TDatabase]()
 
 	serverMetrics := grpcPrometheus.NewServerMetrics()
+	prometheus.MustRegister(serverMetrics)
+	logInterceptor := loggerInterceptor(ctx.logger)
 
 	a := &app[TConfig, TDatabase]{
 		ctx:           ctx,
 		serverMetrics: serverMetrics,
 		unaryInterceptors: []grpc.UnaryServerInterceptor{
+			logging.UnaryServerInterceptor(logInterceptor),
 			serverMetrics.UnaryServerInterceptor(),
 		},
 		streamInterceptors: []grpc.StreamServerInterceptor{
+			logging.StreamServerInterceptor(logInterceptor),
 			serverMetrics.StreamServerInterceptor(),
 		},
 		gatewayGRPCOpts: []grpc.DialOption{
